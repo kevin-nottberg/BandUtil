@@ -1,5 +1,6 @@
 package com.android.band.IO;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -8,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -69,15 +71,28 @@ public class XmlWriter {
 	
 	public void finishAndWriteDoc( Context context ) {
 		// Write the new doc to the android assets.
-		FileOutputStream fileOut = context.openFileOutput( "dotBook.xml", getApplicationContext().MODE_WORLD_READABLE );
+		FileOutputStream fileOut = null;
+		Transformer transformer = null;
+		try {
+			fileOut = context.openFileOutput( "dotBook.xml", Context.MODE_WORLD_WRITEABLE );
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		try {
-			Transformer transformer = transformerFactory.newTransformer();
+			transformer = transformerFactory.newTransformer();
 		} catch (TransformerConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		DOMSource source = new DOMSource(doc);
 		StreamResult streamResult = new StreamResult( fileOut );
+		try {
+			transformer.transform(source, streamResult);
+		} catch (TransformerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
